@@ -1,0 +1,49 @@
+ARG BASE_IMAGE=ubuntu:focal
+FROM ${BASE_IMAGE}
+
+ARG ARCH=amd64
+ARG ROOT_PASSWORD=sshpass
+ARG TIMEZONE=Asia/Shanghai
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=${TIMEZONE}
+
+RUN if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then \
+        REPO_URL="mirrors.aliyun.com/ubuntu-ports"; \
+    else \
+        REPO_URL="mirrors.aliyun.com/ubuntu"; \
+    fi && \
+    sed -i "s@http://.*archive.ubuntu.com/ubuntu/@http://${REPO_URL}/@g" /etc/apt/sources.list && \
+    sed -i "s@http://.*security.ubuntu.com/ubuntu/@http://${REPO_URL}/@g" /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        apt-transport-https ca-certificates curl software-properties-common gnupg \
+        gcc make lsof tzdata perl tar wget sudo systemd ssh psmisc openssh-server vim git iproute2 zsh sqlite3 \
+        net-tools python3 libaio-dev jq locales git-lfs \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN echo "root:${ROOT_PASSWORD}" | chpasswd && \
+    ln -fs /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && \
+    locale-gen en_US.UTF-8 && \
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+RUN curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | apt-key add - && \
+    add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable" && \
+    apt-get update && \
+    apt-get install -y docker-ce && \
+    systemctl enable docker
+
+RUN mkdir -p /etc/docker && \
+cat > /etc/docker/daemon.json <<EOF
+{
+    "registry-mirrors": [
+        "https://docker.m.daocloud.io",
+        "https://mirror.ccs.tencentyun.com",
+        "https://docker.mirrors.ustc.edu.cn",
+        "https://registry.docker-cn.com"
+    ]
+}
+EOF
+
+VOLUME [ "/sys/fs/cgroup" ]
+CMD ["/sbin/init"]

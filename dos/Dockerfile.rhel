@@ -1,0 +1,93 @@
+ARG BASE_IMAGE=centos:7
+FROM ${BASE_IMAGE}
+
+# --- 核心构建参数 ---
+# "Distribution"（Linux 发行版）的缩写
+ARG DISTRO=centos
+ARG OS_VERSION=7
+ARG ARCH=amd64
+ARG ROOT_PASSWORD=sshpass
+ARG TIMEZONE=Asia/Shanghai
+
+# 环境变量
+ENV container=docker
+ENV LC_ALL=zh_CN.UTF-8
+ENV TZ=${TIMEZONE}
+
+# --- 1. 智能镜像源配置 ---
+# 逻辑说明：
+# 1. Rocky: 切换到阿里云 Rocky 源
+# 2. CentOS 8: 切换到 Vault 归档源 (官方停止维护)
+# 3. CentOS 7 (ARM): 切换到阿里云 AltArch 源
+# 4. CentOS 7 (x86): 切换到阿里云标准源
+RUN if [ "$DISTRO" = "rocky" ]; then \
+        sed -e 's|^mirrorlist=|#mirrorlist=|g' \
+            -e 's|^#baseurl=http://dl.rockylinux.org/$contentdir|baseurl=https://mirrors.aliyun.com/rockylinux|g' \
+            -i.bak /etc/yum.repos.d/Rocky-*.repo; \
+    elif [ "$DISTRO" = "centos" ]; then \
+        if [ "$OS_VERSION" = "8" ]; then \
+            sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* && \
+            sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*; \
+        else \
+            if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then \
+                # 不再下载阿里云 repo，而是直接修改系统默认 repo 指向 Vault
+                sed -i 's/mirror.centos.org/vault.centos.org/g' /etc/yum.repos.d/*.repo && \
+                sed -i 's|^#.*baseurl=http|baseurl=https|g' /etc/yum.repos.d/*.repo && \
+                sed -i 's|^mirrorlist=http|#mirrorlist=http|g' /etc/yum.repos.d/*.repo; \
+            else \
+                mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup && \
+                curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.tencent.com/repo/centos7_base.repo; \
+            fi; \
+        fi; \
+    fi && \
+    yum clean all && \
+    yum makecache
+
+# --- 2. 安装依赖组件 ---
+# crontabs: DMP 组件udeploy依赖(未验证)
+RUN yum install -y \
+    sudo vim lsof wget which git iproute net-tools openssh-server passwd crontabs \
+    make autoconf automake cmake gcc gcc-c++ \
+    libaio numactl perl tcl \
+    yum-utils device-mapper-persistent-data lvm2 \
+    && yum clean all
+
+# --- 3. 系统基础配置 ---
+RUN echo "root:${ROOT_PASSWORD}" | chpasswd && \
+    ln -sf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && \
+    chmod u+s $(which ping) && \
+    localedef -i zh_CN -f UTF-8 zh_CN.UTF-8 || true
+
+# --- 4. 安装 Docker (严格区分逻辑) ---
+# 逻辑 A: CentOS 7 ARM64 -> 使用官方源 + 强制修正架构参数 (修复依赖报错)
+# 逻辑 B: 其他 (x86/Rocky) -> 使用阿里云源加速
+RUN if [ "$DISTRO" = "centos" ] && [ "$OS_VERSION" = "7" ] && { [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; }; then \
+        echo ">>> [ARM64 Fix] Applying Docker Official Repo & Arch Fix..." && \
+        yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo && \
+        sed -i 's/$basearch/aarch64/g' /etc/yum.repos.d/docker-ce.repo && \
+        yum makecache fast && \
+        yum -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin; \
+    else \
+        echo ">>> [Standard] Applying Aliyun Docker Mirror..." && \
+        yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo && \
+        sed -i 's+download.docker.com+mirrors.aliyun.com/docker-ce+' /etc/yum.repos.d/docker-ce.repo && \
+        yum makecache fast && \
+        yum -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin; \
+    fi && \
+    systemctl enable docker
+
+# --- 5. Docker Daemon 配置 ---
+RUN mkdir -p /etc/docker && \
+cat > /etc/docker/daemon.json <<EOF
+{
+    "registry-mirrors": [
+        "https://docker.m.daocloud.io",
+        "https://mirror.ccs.tencentyun.com",
+        "https://docker.mirrors.ustc.edu.cn",
+        "https://registry.docker-cn.com"
+    ]
+}
+EOF
+
+VOLUME [ "/sys/fs/cgroup" ]
+CMD ["/usr/sbin/init"]
