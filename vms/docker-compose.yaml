@@ -1,0 +1,145 @@
+x-templates:
+  agent_centos7_x86_64:
+    &agent_centos7_x86_64
+    image: finnley/centos7:x86_64
+    privileged: true
+    stdin_open: true
+    tty: true
+    extra_hosts:
+      - "docker-registry:192.168.18.20"
+    cap_add:
+      - ALL
+    working_dir: /opt
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - ~/workspace/shared:/opt/shared
+
+services:
+
+  vm-1:
+    container_name: vm-1
+    hostname: "vm-1"
+    networks:
+      vm_net:
+        ipv4_address: 172.20.30.1
+      vm_net_2:
+        ipv4_address: 172.20.40.1
+    ports:
+      - "3306:3306"
+      - "6379:6379"
+      - "20000:10000"
+      - "20001:18080"
+      - "20002:27001"
+      - "20003:3306"
+      - "10000:10000"
+      - "25690:5690"
+      - "25700:5700"
+      - "25708:5708"
+      - "25709:5709"
+      - "25713:5713"
+      - "25715:5715"
+      - "25725:5725"
+      - "25728:5728"
+      - "25730:5730"
+      - "25766:5766"
+      - "25780:5780"
+      - "25799:5799"
+      - "25810:5810"
+      - "23450:2345"
+    volumes:
+      - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
+      - "~/workspace/shared:/opt/shared"
+    <<: *agent_centos7_x86_64
+
+  vm-2:
+    container_name: vm-2
+    hostname: "vm-2"
+    networks:
+      vm_net:
+        ipv4_address: 172.20.30.2
+      vm_net_2:
+        ipv4_address: 172.20.40.2
+    ports:
+      - "3307:3306"
+      - "6380:6379"
+      - "20004:10000"
+      - "20005:18080"
+      - "20006:27001"
+      - "20007:3306"
+    volumes:
+      - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
+      - "~/workspace/shared:/opt/shared"
+    <<: *agent_centos7_x86_64
+
+  vm-3:
+    container_name: vm-3
+    hostname: "vm-3"
+    networks:
+      vm_net:
+        ipv4_address: 172.20.30.3
+      vm_net_2:
+        ipv4_address: 172.20.40.3
+    ports:
+      - "3308:3306"
+      - "6381:6379"
+      - "20009:18080"
+      - "20010:27001"
+      - "20011:3306"
+    volumes:
+      - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
+      - "~/workspace/shared:/opt/shared"
+    <<: *agent_centos7_x86_64
+
+  vm-4:
+    container_name: vm-4
+    hostname: "vm-4"
+    networks:
+      vm_net:
+        ipv4_address: 172.20.30.4
+      vm_net_2:
+        ipv4_address: 172.20.40.4
+    ports:
+      - "3309:3306"
+      - "6382:6379"
+      - "20012:10000"
+      - "20013:18080"
+      - "20014:27001"
+    volumes:
+      - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
+      - "~/workspace/shared:/opt/shared"
+    <<: *agent_centos7_x86_64
+
+  vm-5:
+    container_name: vm-5
+    hostname: "vm-5"
+    networks:
+      vm_net:
+        ipv4_address: 172.20.30.5
+      vm_net_2:
+        ipv4_address: 172.20.40.5
+    ports:
+      - "3310:3306"
+      - "6383:6379"
+      - "20016:10000"
+      - "20017:18080"
+      - "20018:27001"
+    volumes:
+      - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
+      - "~/workspace/shared:/opt/shared"
+    <<: *agent_centos7_x86_64
+
+networks:
+  vm_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.30.0/24
+          gateway: 172.20.30.254
+  vm_net_2:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.40.0/24
+          gateway: 172.20.40.254
+
