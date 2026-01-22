@@ -126,7 +126,7 @@ build-ubuntu-noble:
 		--build-arg ARCH=$(UBUNTU_ARCH) \
 		--build-arg ROOT_PASSWORD=$(ROOT_PASSWORD) \
 		-f Dockerfile.ubuntu-noble \
-		-t $(REGISTRY)/ubuntu2004:$(UBUNTU_ARCH) .
+		-t $(REGISTRY)/ubuntu2404:$(UBUNTU_ARCH) .
 
 # ==========================================
 # 2. 沙盒调试
