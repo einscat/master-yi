@@ -1,0 +1,78 @@
+# syntax=docker/dockerfile:1
+ARG BASE_IMAGE=ubuntu:24.04
+FROM ${BASE_IMAGE}
+
+ARG ARCH=amd64
+ARG ROOT_PASSWORD=sshpass
+ARG TIMEZONE=Asia/Shanghai
+
+# 提前設置環境變數，避免 tzdata 等包安裝時彈出交互界面
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=${TIMEZONE}
+
+# 1. 根據 ARCH 切換阿里雲 apt 源（amd64 / arm64 區分 ports）
+RUN if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then \
+        REPO_URL="mirrors.aliyun.com/ubuntu-ports"; \
+    else \
+        REPO_URL="mirrors.aliyun.com/ubuntu"; \
+    fi && \
+    sed -i "s|http://.*archive.ubuntu.com/ubuntu/|http://${REPO_URL}/|g" /etc/apt/sources.list && \
+    sed -i "s|http://.*security.ubuntu.com/ubuntu/|http://${REPO_URL}/|g" /etc/apt/sources.list && \
+    # 先更新 + 安裝 tzdata 並設定時區，永遠避免交互
+    apt-get update -qq && \
+    apt-get install -y --no-install-recommends tzdata && \
+    ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
+    echo ${TZ} > /etc/timezone && \
+    dpkg-reconfigure -f noninteractive tzdata
+
+# 2. 安裝常用工具包（合併 update + install，減少層）
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates curl gnupg lsb-release \
+        apt-transport-https software-properties-common \
+        gcc make lsof perl tar wget sudo systemd ssh psmisc openssh-server vim git iproute2 zsh sqlite3 \
+        net-tools python3 libaio-dev jq locales git-lfs && \
+    locale-gen en_US.UTF-8 && \
+    # 設定 root 密碼 + 允許 root 密碼登錄 SSH
+    echo "root:${ROOT_PASSWORD}" | chpasswd && \
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
+    # 清理緩存，減小鏡像大小
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# 3. 安裝 Docker（阿里雲鏡像加速，官方推薦 keyrings 方式）
+RUN install -m 0755 -d /etc/apt/keyrings && \
+    curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && \
+    chmod a+r /etc/apt/keyrings/docker.asc && \
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://mirrors.aliyun.com/docker-ce/linux/ubuntu \
+      noble stable" | \
+      tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+    apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+        docker-ce \
+        docker-ce-cli \
+        containerd.io \
+        docker-buildx-plugin \
+        docker-compose-plugin && \
+    # 啟用 docker 服務（systemd 容器內有效）
+    systemctl enable docker && \
+    # 清理
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# 4. 配置 Docker 國內加速（保持你原列表）
+RUN mkdir -p /etc/docker && \
+    echo '{\
+      "registry-mirrors": [\
+        "https://docker.m.daocloud.io",\
+        "https://mirror.ccs.tencentyun.com",\
+        "https://docker.mirrors.ustc.edu.cn",\
+        "https://registry.docker-cn.com"\
+      ]\
+    }' > /etc/docker/daemon.json
+
+# systemd 容器必需的 cgroup 掛載
+VOLUME ["/sys/fs/cgroup"]
+
+# 使用 systemd 作為入口點
+CMD ["/sbin/init"]

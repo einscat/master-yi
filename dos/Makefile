@@ -59,7 +59,7 @@ help:
 	@echo "   make build-el7         -> 构建 CentOS 7 镜像"
 	@echo "   make build-el8         -> 构建 CentOS 8 镜像"
 	@echo "   make build-rocky8      -> 构建 Rocky Linux 8 镜像"
-	@echo "   make build-ubuntu      -> 构建 Ubuntu 20.04 镜像"
+	@echo "   make build-ubuntu-focal-> 构建 Ubuntu 20.04 镜像"
 	@echo ""
 	@echo " [2. 沙盒调试指令 (Playground)]"
 	@echo "   make playground-el7    -> 启动 CentOS 7 测试容器 (后台运行)"
@@ -71,7 +71,7 @@ help:
 	@echo " [3. 镜像推送指令 (Push)]"
 	@echo "   make push-el7          -> 推送 CentOS 7 到仓库 $(REGISTRY)"
 	@echo "   make push-rocky8       -> 推送 Rocky 8 到仓库 $(REGISTRY)"
-	@echo "   make push-ubuntu       -> 推送 Ubuntu 到仓库 $(REGISTRY)"
+	@echo "   make push-ubuntu-focal -> 推送 Ubuntu 到仓库 $(REGISTRY)"
 	@echo ""
 	@echo " [高级用法示例]"
 	@echo "   # 在 M1/M2 Mac (arm64) 上强制构建 x86 镜像:"
@@ -112,12 +112,20 @@ build-el8:
 		-f Dockerfile.rhel \
 		-t $(REGISTRY)/centos8:$(RHEL_ARCH) .
 
-build-ubuntu:
+build-ubuntu-focal:
 	docker build --platform $(DOCKER_PLATFORM) \
 		--build-arg BASE_IMAGE=ubuntu:focal \
 		--build-arg ARCH=$(UBUNTU_ARCH) \
 		--build-arg ROOT_PASSWORD=$(ROOT_PASSWORD) \
-		-f Dockerfile.ubuntu \
+		-f Dockerfile.ubuntu-focal \
+		-t $(REGISTRY)/ubuntu2004:$(UBUNTU_ARCH) .
+
+build-ubuntu-noble:
+	docker build --platform $(DOCKER_PLATFORM) \
+		--build-arg BASE_IMAGE=ubuntu:noble \
+		--build-arg ARCH=$(UBUNTU_ARCH) \
+		--build-arg ROOT_PASSWORD=$(ROOT_PASSWORD) \
+		-f Dockerfile.ubuntu-noble \
 		-t $(REGISTRY)/ubuntu2004:$(UBUNTU_ARCH) .
 
 # ==========================================
