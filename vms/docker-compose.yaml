@@ -2,6 +2,7 @@ x-templates:
   agent_ubuntu2404_amd64:
     &agent_ubuntu2404_amd64
     image: finnley/ubuntu2404:amd64
+    privileged: true
     stdin_open: true
     tty: true
     extra_hosts:
@@ -16,6 +17,7 @@ services:
 
   vm-1:
     container_name: vm-1
+    privileged: true
     hostname: "vm-1"
     networks:
       vm_net:
@@ -23,12 +25,12 @@ services:
       vm_net_2:
         ipv4_address: 172.20.40.1
     volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
       - "~/workspace/shared:/opt/shared"
     <<: *agent_ubuntu2404_amd64
 
   vm-2:
     container_name: vm-2
+    privileged: true
     hostname: "vm-2"
     networks:
       vm_net:
@@ -36,12 +38,12 @@ services:
       vm_net_2:
         ipv4_address: 172.20.40.2
     volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
       - "~/workspace/shared:/opt/shared"
     <<: *agent_ubuntu2404_amd64
 
   vm-3:
     container_name: vm-3
+    privileged: true
     hostname: "vm-3"
     networks:
       vm_net:
@@ -49,12 +51,12 @@ services:
       vm_net_2:
         ipv4_address: 172.20.40.3
     volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
       - "~/workspace/shared:/opt/shared"
     <<: *agent_ubuntu2404_amd64
 
   vm-4:
     container_name: vm-4
+    privileged: true
     hostname: "vm-4"
     networks:
       vm_net:
@@ -62,12 +64,12 @@ services:
       vm_net_2:
         ipv4_address: 172.20.40.4
     volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
       - "~/workspace/shared:/opt/shared"
     <<: *agent_ubuntu2404_amd64
 
   vm-5:
     container_name: vm-5
+    privileged: true
     hostname: "vm-5"
     networks:
       vm_net:
@@ -75,7 +77,6 @@ services:
       vm_net_2:
         ipv4_address: 172.20.40.5
     volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
       - "~/workspace/shared:/opt/shared"
     <<: *agent_ubuntu2404_amd64
 
