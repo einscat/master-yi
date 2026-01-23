@@ -256,7 +256,6 @@
       ]
     },
     "volumes": [
-      "/sys/fs/cgroup:/sys/fs/cgroup:rw",
       "~/workspace/shared:/opt/shared"
     ]
   }
