@@ -24,6 +24,13 @@ services:
         ipv4_address: 172.20.30.1
       vm_net_2:
         ipv4_address: 172.20.40.1
+    ports:
+      - "8080:8080"
+      - "3311:3306"
+      - "20020:10000"
+      - "20021:18080"
+      - "20022:27001"
+      - "6384:6379"
     volumes:
       - "~/workspace/shared:/opt/shared"
     <<: *agent_ubuntu2404_amd64
@@ -37,6 +44,12 @@ services:
         ipv4_address: 172.20.30.2
       vm_net_2:
         ipv4_address: 172.20.40.2
+    ports:
+      - "3312:3306"
+      - "20024:10000"
+      - "20025:18080"
+      - "20026:27001"
+      - "6385:6379"
     volumes:
       - "~/workspace/shared:/opt/shared"
     <<: *agent_ubuntu2404_amd64
@@ -50,6 +63,12 @@ services:
         ipv4_address: 172.20.30.3
       vm_net_2:
         ipv4_address: 172.20.40.3
+    ports:
+      - "3313:3306"
+      - "20028:10000"
+      - "20029:18080"
+      - "20030:27001"
+      - "6386:6379"
     volumes:
       - "~/workspace/shared:/opt/shared"
     <<: *agent_ubuntu2404_amd64
@@ -63,6 +82,12 @@ services:
         ipv4_address: 172.20.30.4
       vm_net_2:
         ipv4_address: 172.20.40.4
+    ports:
+      - "3314:3306"
+      - "6387:6379"
+      - "20032:10000"
+      - "20033:18080"
+      - "20034:27001"
     volumes:
       - "~/workspace/shared:/opt/shared"
     <<: *agent_ubuntu2404_amd64
@@ -76,6 +101,12 @@ services:
         ipv4_address: 172.20.30.5
       vm_net_2:
         ipv4_address: 172.20.40.5
+    ports:
+      - "3315:3306"
+      - "6388:6379"
+      - "20036:10000"
+      - "20037:18080"
+      - "20038:27001"
     volumes:
       - "~/workspace/shared:/opt/shared"
     <<: *agent_ubuntu2404_amd64
