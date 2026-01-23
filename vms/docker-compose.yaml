@@ -17,8 +17,8 @@ services:
 
   vm-1:
     container_name: vm-1
-    privileged: true
     hostname: "vm-1"
+    privileged: true
     networks:
       vm_net:
         ipv4_address: 172.20.30.1
@@ -30,8 +30,8 @@ services:
 
   vm-2:
     container_name: vm-2
-    privileged: true
     hostname: "vm-2"
+    privileged: true
     networks:
       vm_net:
         ipv4_address: 172.20.30.2
@@ -43,8 +43,8 @@ services:
 
   vm-3:
     container_name: vm-3
-    privileged: true
     hostname: "vm-3"
+    privileged: true
     networks:
       vm_net:
         ipv4_address: 172.20.30.3
@@ -56,8 +56,8 @@ services:
 
   vm-4:
     container_name: vm-4
-    privileged: true
     hostname: "vm-4"
+    privileged: true
     networks:
       vm_net:
         ipv4_address: 172.20.30.4
@@ -69,8 +69,8 @@ services:
 
   vm-5:
     container_name: vm-5
-    privileged: true
     hostname: "vm-5"
+    privileged: true
     networks:
       vm_net:
         ipv4_address: 172.20.30.5

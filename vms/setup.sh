@@ -193,6 +193,7 @@ while read -r entry; do
   vm-${container_index}:
     container_name: vm-${container_index}
     hostname: \"vm-${container_index}\"
+    privileged: true
     networks:
       vm_net:
         ipv4_address: 172.20.30.${container_index}
