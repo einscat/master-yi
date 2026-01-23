@@ -57,6 +57,7 @@ x-templates:
 
   agent_ubuntu2404_amd64: &agent_ubuntu2404_amd64
     image: finnley/ubuntu2404:amd64
+    privileged: true
     stdin_open: true
     tty: true
     extra_hosts:
