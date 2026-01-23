@@ -72,7 +72,8 @@ RUN mkdir -p /etc/docker && \
     }' > /etc/docker/daemon.json
 
 # systemd 容器必需的 cgroup 掛載
-VOLUME ["/sys/fs/cgroup"]
+# VOLUME ["/sys/fs/cgroup"]
 
 # 使用 systemd 作為入口點
-CMD ["/sbin/init"]
+# CMD ["/sbin/init"]
+ENTRYPOINT ["/lib/systemd/systemd"]

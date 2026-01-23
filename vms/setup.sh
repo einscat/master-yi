@@ -192,7 +192,6 @@ while read -r entry; do
       echo "
   vm-${container_index}:
     container_name: vm-${container_index}
-    privileged: true
     hostname: \"vm-${container_index}\"
     networks:
       vm_net:
