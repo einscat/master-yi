@@ -216,7 +216,7 @@
     ]
   },
   "ubuntu2404_amd64": {
-    "enable": true,
+    "enable": false,
     "count": 5,
     "ports": {
       "vm-1": [
@@ -261,7 +261,7 @@
     ]
   },
   "ubuntu2404_arm64": {
-    "enable": false,
+    "enable": true,
     "count": 5,
     "ports": {
       "vm-1": [
@@ -302,7 +302,10 @@
       ]
     },
     "volumes": [
-      "~/workspace/shared:/opt/shared"
+      "~/workspace/shared:/opt/shared",
+      "/var/lib/docker",
+      "/var/lib/containerd",
+      "/lib/modules:/lib/modules:ro"
     ]
   }
 }

@@ -1,7 +1,7 @@
 x-templates:
-  agent_ubuntu2404_amd64:
-    &agent_ubuntu2404_amd64
-    image: finnley/ubuntu2404:amd64
+  agent_ubuntu2404_arm64:
+    &agent_ubuntu2404_arm64
+    image: finnley/ubuntu2404:arm64
     privileged: true
     stdin_open: true
     tty: true
@@ -11,6 +11,7 @@ x-templates:
       - ALL
     working_dir: /opt
     volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
       - ~/workspace/shared:/opt/shared
 
 services:
@@ -33,7 +34,8 @@ services:
       - "6384:6379"
     volumes:
       - "~/workspace/shared:/opt/shared"
-    <<: *agent_ubuntu2404_amd64
+      - "/var/lib/docker"
+    <<: *agent_ubuntu2404_arm64
 
   vm-2:
     container_name: vm-2
@@ -52,7 +54,8 @@ services:
       - "6385:6379"
     volumes:
       - "~/workspace/shared:/opt/shared"
-    <<: *agent_ubuntu2404_amd64
+      - "/var/lib/docker"
+    <<: *agent_ubuntu2404_arm64
 
   vm-3:
     container_name: vm-3
@@ -71,7 +74,8 @@ services:
       - "6386:6379"
     volumes:
       - "~/workspace/shared:/opt/shared"
-    <<: *agent_ubuntu2404_amd64
+      - "/var/lib/docker"
+    <<: *agent_ubuntu2404_arm64
 
   vm-4:
     container_name: vm-4
@@ -90,7 +94,8 @@ services:
       - "20034:27001"
     volumes:
       - "~/workspace/shared:/opt/shared"
-    <<: *agent_ubuntu2404_amd64
+      - "/var/lib/docker"
+    <<: *agent_ubuntu2404_arm64
 
   vm-5:
     container_name: vm-5
@@ -109,7 +114,8 @@ services:
       - "20038:27001"
     volumes:
       - "~/workspace/shared:/opt/shared"
-    <<: *agent_ubuntu2404_amd64
+      - "/var/lib/docker"
+    <<: *agent_ubuntu2404_arm64
 
 networks:
   vm_net:
