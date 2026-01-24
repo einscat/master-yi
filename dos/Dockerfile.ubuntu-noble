@@ -10,9 +10,9 @@ ARG TIMEZONE=Asia/Shanghai
 ENV DEBIAN_FRONTEND=noninteractive \
     TZ=${TIMEZONE} \
     SYSTEMD_COLORS=true \
-    LANG=zh_CN.UTF-8 \
-    LANGUAGE=zh_CN:zh \
-    LC_ALL=zh_CN.UTF-8
+    LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8
 
 # ────────────────────────────────────────────────
 # 1. 切换阿里云源 + 安装 tzdata + 设置时区
@@ -23,7 +23,7 @@ RUN if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then \
         REPO_URL="mirrors.aliyun.com/ubuntu"; \
     fi && \
     sed -i "s|http://.*archive.ubuntu.com/ubuntu/|http://${REPO_URL}/|g" /etc/apt/sources.list && \
-    sed -i "s|http://.*security.ubuntu.com/ubuntu/|http://${REPO_URL}/|g" /etc/apt/sources.list && \
+    sed -i "s|http://.*security.ubuntu.com/ubuntu/|http://${REPO_URL}/|g" /etc/apt/sources.list || true && \
     apt-get update -qq && \
     apt-get install -y --no-install-recommends tzdata && \
     ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
@@ -44,7 +44,7 @@ RUN apt-get update -qq && \
         fonts-wqy-zenhei fonts-wqy-microhei \
         iputils-ping dbus dbus-user-session && \
     # 生成中文 locale
-    locale-gen zh_CN.UTF-8 && \
+    locale-gen en_US.UTF-8 zh_CN.UTF-8 && \
     # 设置 root 密码 + 允许 root ssh 密码登录
     echo "root:${ROOT_PASSWORD}" | chpasswd && \
     sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
@@ -75,14 +75,16 @@ RUN install -m 0755 -d /etc/apt/keyrings && \
 # 4. 配置 Docker 国内加速
 # ────────────────────────────────────────────────
 RUN mkdir -p /etc/docker && \
-    echo '{\
-      "registry-mirrors": [\
-        "https://docker.m.daocloud.io",\
-        "https://mirror.ccs.tencentyun.com",\
-        "https://docker.mirrors.ustc.edu.cn",\
-        "https://registry.docker-cn.com"\
-      ]\
-    }' > /etc/docker/daemon.json
+    cat > /etc/docker/daemon.json <<EOF
+{
+  "registry-mirrors": [
+    "https://docker.m.daocloud.io",
+    "https://mirror.ccs.tencentyun.com",
+    "https://docker.mirrors.ustc.edu.cn",
+    "https://registry.docker-cn.com"
+  ]
+}
+EOF
 
 # 使用 systemd 作为 PID 1
 ENTRYPOINT ["/lib/systemd/systemd"]
