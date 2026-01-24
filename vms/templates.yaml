@@ -68,8 +68,8 @@ x-templates:
     volumes:
       - ~/workspace/shared:/opt/shared
 
-  agent_ubuntu2204_arm64: &agent_ubuntu2204_arm64
-    image: finnley/ubuntu22.04:arm64
+  agent_ubuntu2404_arm64: &agent_ubuntu2404_arm64
+    image: finnley/ubuntu2404:arm64
     privileged: true
     stdin_open: true
     tty: true

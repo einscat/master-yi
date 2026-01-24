@@ -82,7 +82,8 @@ RUN mkdir -p /etc/docker && \
     "https://mirror.ccs.tencentyun.com",
     "https://docker.mirrors.ustc.edu.cn",
     "https://registry.docker-cn.com"
-  ]
+  ],
+  "exec-opts": ["native.cgroupdriver=systemd"]
 }
 EOF
 
