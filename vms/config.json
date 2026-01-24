@@ -216,7 +216,7 @@
     ]
   },
   "ubuntu2404_amd64": {
-    "enable": false,
+    "enable": true,
     "count": 5,
     "ports": {
       "vm-1": [
