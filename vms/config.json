@@ -257,11 +257,14 @@
       ]
     },
     "volumes": [
-      "~/workspace/shared:/opt/shared"
+      "~/workspace/shared:/opt/shared",
+      "/var/lib/docker",
+      "/var/lib/containerd",
+      "/lib/modules:/lib/modules:ro"
     ]
   },
   "ubuntu2404_arm64": {
-    "enable": true,
+    "enable": false,
     "count": 5,
     "ports": {
       "vm-1": [
