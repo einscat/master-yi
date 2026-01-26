@@ -45,7 +45,7 @@ RUN apt-get update -qq && \
         iputils-ping dbus dbus-user-session && \
     # 生成中文 locale
     locale-gen en_US.UTF-8 zh_CN.UTF-8 && \
-    sed -i 's/#DNS=/DNS=114.114.114.114/' /etc/systemd/resolved.conf && \
+    printf "[Resolve]\nDNS=114.114.114.114\n" > /etc/systemd/resolved.conf && \
     # 设置 root 密码 + 允许 root ssh 密码登录
     echo "root:${ROOT_PASSWORD}" | chpasswd && \
     sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
